@@ -5,6 +5,7 @@ import LoginForm from './LoginForm'
 import Message from './Message'
 import ArticleForm from './ArticleForm'
 import Spinner from './Spinner'
+import axios from 'axios'
 
 const articlesUrl = 'http://localhost:9000/api/articles'
 const loginUrl = 'http://localhost:9000/api/login'
@@ -18,10 +19,13 @@ export default function App() {
 
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate()
-  const redirectToLogin = () => { /* ✨ implement */ }
-  const redirectToArticles = () => { /* ✨ implement */ }
+  const redirectToLogin = () => { navigate('/') }
+  const redirectToArticles = () => { navigate('/articles') }
 
   const logout = () => {
+    localStorage.getItem('token') && localStorage.removeItem('token')
+    setMessage('Goodbye!')
+    redirectToLogin()
     // ✨ implement
     // If a token is in local storage it should be removed,
     // and a message saying "Goodbye!" should be set in its proper state.
@@ -30,6 +34,18 @@ export default function App() {
   }
 
   const login = ({ username, password }) => {
+    setMessage('')
+    setSpinnerOn(true)
+    axios.post(loginUrl, {username: username, password: password})
+      .then(res => {
+        localStorage.setItem('token', res.data.token)
+        setMessage(res.data.message)
+        setSpinnerOn(false)
+        redirectToArticles()
+      })
+      .catch(err => {
+        console.log(err)
+      })
     // ✨ implement
     // We should flush the message state, turn on the spinner
     // and launch a request to the proper endpoint.
@@ -38,7 +54,9 @@ export default function App() {
     // to the Articles screen. Don't forget to turn off the spinner!
   }
 
-  const getArticles = () => {
+  const getArticles = (articleArray, message) => {
+    setArticles(articleArray)
+    setMessage(message)
     // ✨ implement
     // We should flush the message state, turn on the spinner
     // and launch an authenticated request to the proper endpoint.
