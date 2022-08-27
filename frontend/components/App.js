@@ -7,6 +7,7 @@ import ArticleForm from './ArticleForm'
 import Spinner from './Spinner'
 import axios from 'axios'
 import { axiosWithAuth } from '../axios'
+import {AuthRoute} from './AuthRoute'
 
 const articlesUrl = 'http://localhost:9000/api/articles'
 const loginUrl = 'http://localhost:9000/api/login'
@@ -70,7 +71,7 @@ export default function App() {
   }
 
   const postArticle = article => {
-      axiosWithAuth().post('http://localhost:9000/api/articles', article)
+      axiosWithAuth().post(articlesUrl, article)
         .then(res => {
           setArticles(articles.concat(res.data.article))
           setMessage(res.data.message)
@@ -84,10 +85,22 @@ export default function App() {
     // to inspect the response from the server.
   }
 
-  const updateArticle = ({ article_id, article }) => {
-    axiosWithAuth().put(`http://localhost:9000/api/articles/${article_id}`, article)
+  const updateArticle = (values) => {
+    const { article_id, text, title, topic } = values
+    axiosWithAuth().put(articlesUrl + `/${article_id}`, { text: text, title: title, topic: topic })
       .then(res => {
-        console.log(res)
+        const { article, message } = res.data
+        // console.log(article, message)
+        const newData = articles.map(art => {
+          if(article.article_id === art.article_id) {
+            return article
+          } else {
+            return art
+          }
+        })
+        setArticles(newData)
+        setMessage(message)
+
       })
       .catch(err => {
         console.log(err)
@@ -97,6 +110,15 @@ export default function App() {
   }
 
   const deleteArticle = article_id => {
+    axiosWithAuth().delete(articlesUrl + '/' + article_id)
+      .then(res => {
+        setMessage(res.data.message)
+        const newData = articles.filter(art => art.article_id !== article_id)
+        setArticles(newData)
+      })
+      .catch(err => {
+        console.log(err)
+      })
     // ✨ implement
   }
 
@@ -132,13 +154,15 @@ export default function App() {
                 currentArticleId={currentArticleId}
                 getCurrentArticle={getCurrentArticle}
               />
-              <Articles 
-                articles={articles}
-                getArticles={getArticles}
-                deleteArticle={deleteArticle}
-                setCurrentArticleId={setCurrentArticleId}
-                currentArticleId={currentArticleId}
-              />
+              <AuthRoute>
+                <Articles 
+                  articles={articles}
+                  getArticles={getArticles}
+                  deleteArticle={deleteArticle}
+                  setCurrentArticleId={setCurrentArticleId}
+                  currentArticleId={currentArticleId}
+                />
+              </AuthRoute>
             </>
           } />
         </Routes>

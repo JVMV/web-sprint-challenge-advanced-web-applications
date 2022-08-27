@@ -6,7 +6,6 @@ import { axiosWithAuth } from '../axios/index'
 export default function Articles(props) {
   // ✨ where are my props? Destructure them here
   const { articles, getArticles, deleteArticle, setCurrentArticleId, currentArticleId } = props
-  !localStorage.getItem('token') ? <Navigate to='/' /> : props.children
   // ✨ implement conditional logic: if no token exists
   // we should render a Navigate to login screen (React Router v.6)
 
@@ -43,7 +42,7 @@ export default function Articles(props) {
                 </div>
                 <div>
                   <button disabled={false} onClick={() => editArticle(art.article_id)}>Edit</button>
-                  <button disabled={false} onClick={deleteArticle}>Delete</button>
+                  <button disabled={false} onClick={() => deleteArticle(art.article_id)}>Delete</button>
                 </div>
               </div>
             )
