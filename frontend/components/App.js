@@ -6,6 +6,7 @@ import Message from './Message'
 import ArticleForm from './ArticleForm'
 import Spinner from './Spinner'
 import axios from 'axios'
+import { axiosWithAuth } from '../axios'
 
 const articlesUrl = 'http://localhost:9000/api/articles'
 const loginUrl = 'http://localhost:9000/api/login'
@@ -16,6 +17,7 @@ export default function App() {
   const [articles, setArticles] = useState([])
   const [currentArticleId, setCurrentArticleId] = useState()
   const [spinnerOn, setSpinnerOn] = useState(false)
+  const [currentArticle, setCurrentArticle] = useState(null)
 
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate()
@@ -68,6 +70,14 @@ export default function App() {
   }
 
   const postArticle = article => {
+      axiosWithAuth().post('http://localhost:9000/api/articles', article)
+        .then(res => {
+          setArticles(articles.concat(res.data.article))
+          setMessage(res.data.message)
+        })
+        .catch(err => {
+          setMessage(err.message)
+        })
     // ✨ implement
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
@@ -75,12 +85,27 @@ export default function App() {
   }
 
   const updateArticle = ({ article_id, article }) => {
+    axiosWithAuth().put(`http://localhost:9000/api/articles/${article_id}`, article)
+      .then(res => {
+        console.log(res)
+      })
+      .catch(err => {
+        console.log(err)
+      })
     // ✨ implement
     // You got this!
   }
 
   const deleteArticle = article_id => {
     // ✨ implement
+  }
+
+  const getCurrentArticle = (id) => {
+    articles.map(art => {
+      if(art.article_id === id) {
+        setCurrentArticle(art)
+      }
+    })
   }
 
   return (
@@ -103,7 +128,9 @@ export default function App() {
                 postArticle={postArticle}
                 updateArticle={updateArticle}
                 setCurrentArticleId={setCurrentArticleId}
-                currentArticle={null}
+                currentArticle={currentArticle}
+                currentArticleId={currentArticleId}
+                getCurrentArticle={getCurrentArticle}
               />
               <Articles 
                 articles={articles}
